@@ -1,0 +1,9 @@
+• NOVO: Boje tamne teme s većim kontrastom
+• NOVO: Google Assistant za navigaciju i pretraživanje
+• OSM podaci karte od 11. siječnja
+• Postavka teme navigacije "Automatski" prati tamni/svijetli način rada sustava
+• Tanije linije podzemne željeznice
+• Rezultati pretraživanja prikazuju kapacitet za parkiranje motocikala, najam bicikala, punjenje bicikala i punjenje automobila
+• Prikaži razinu kata u rezultatima pretraživanja
+• Albanski prijevodi i TTS glasovno navođenje
+…više na omaps.org/news

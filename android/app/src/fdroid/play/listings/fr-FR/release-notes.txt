@@ -1,0 +1,11 @@
+• NOUVEAU : Thème sombre plus contrasté
+• NOUVEAU : Assistant Google pour navigation/recherche
+• Données OSM du 11 janvier
+• Thème navigation « Auto » selon le système
+• Lignes de métro plus fines
+• Capacités stationnement motos, location/recharge vélos, recharge autos affichées
+• Niveau d'étage dans la recherche
+• Traductions albanais et voix TTS
+• FAQ et traductions app mises à jour
+• Plantages corrigés
+…plus sur omaps.org/fr/news

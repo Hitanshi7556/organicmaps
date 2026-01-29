@@ -1,0 +1,16 @@
+• NYHET: Mörkt tema med högre kontrast
+• Uppdaterad OpenStreetMap-data (11 januari)
+• Exkluderade kasinon från kategorin "Underhållning"
+• Minskad tjocklek på tunnelbanelinjer
+• Lade till kapacitetsinformation i sökresultat för motorcykelparkering, cykeluthyrning, cykelladdning och billaddning
+• Visa våningsplan i sökresultat
+• Bredare ruttplaneringsknappar
+
+### Översättningar
+
+• Lade till albansk översättning av appen och röstguidning
+• Uppdaterade FAQ och lade till FAQ-översättningar för arabiska, tjeckiska, nederländska, farsi, grekiska, hebreiska, hindi, ungerska, indonesiska, italienska, litauiska, marathi, svenska, telugu
+• Förbättrade tyska app- och FAQ-översättningar
+• Lade till bulgariska sökssynonymer
+• Döpte om inställningen "Zoomknappar" för tydlighetens skull
+• Översättningskorrigeringar från Weblate-bidragsgivare för olika språk

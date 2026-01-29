@@ -1,0 +1,16 @@
+• NOVO: Boje tamne teme većeg kontrasta
+• Ažurirani podaci OpenStreetMap-a (11. siječnja)
+• Isključena casina iz kategorije "Zabava"
+• Smanjena debljina linija podzemne željeznice
+• Dodane informacije o kapacitetu u rezultate pretraživanja za parkiranje motocikala, najam bicikala, punjenje bicikala i punjenje automobila
+• Prikaz kata u rezultatima pretraživanja
+• Širi gumbi za planiranje rute
+
+### Prijevodi
+
+• Dodani prijevodi aplikacije i glasovno navođenje na albanskom jeziku
+• Ažurirana Česta pitanja (FAQ) i dodani prijevodi za arapski, češki, nizozemski, perzijski, grčki, hebrejski, hindi, mađarski, indonezijski, talijanski, litvanski, marati, švedski, telugu
+• Poboljšani njemački prijevodi aplikacije i Čestih pitanja
+• Dodani bugarski sinonimi za pretraživanje
+• Preimenovana postavka "Gumbi za zumiranje" radi jasnoće
+• Ispravci prijevoda suradnika Weblatea za razne jezike

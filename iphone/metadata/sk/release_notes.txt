@@ -1,0 +1,16 @@
+• NOVINKA: Farby tmavého motívu s vyšším kontrastom
+• Aktualizované údaje OpenStreetMap (11. januára)
+• Kasína vylúčené z kategórie „Zábava“
+• Znížená hrúbka liniek metra
+• Pridané informácie o kapacite do výsledkov vyhľadávania pre parkovanie motocyklov, požičovne bicyklov, nabíjanie bicyklov a nabíjanie áut
+• Zobrazenie poschodia vo výsledkoch vyhľadávania
+• Širšie tlačidlá na plánovanie trasy
+
+### Preklady
+
+• Pridaný preklad aplikácie a hlasová navigácia do albánčiny
+• Aktualizované Často kladené otázky (FAQ) a pridané preklady pre arabčinu, češtinu, holandčinu, perzštinu, gréčtinu, hebrejčinu, hindčinu, maďarčinu, indonézštinu, taliančinu, litovčinu, maráthčinu, švédčinu a telugčinu
+• Vylepšené nemecké preklady aplikácie a FAQ
+• Pridané bulharské synonymá pre vyhľadávanie
+• Premenované nastavenie „Tlačidlá priblíženia“ pre lepšiu zrozumiteľnosť
+• Opravy prekladov od prispievateľov Weblate pre rôzne jazyky

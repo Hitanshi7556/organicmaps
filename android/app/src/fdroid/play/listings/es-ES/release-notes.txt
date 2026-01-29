@@ -1,0 +1,8 @@
+• NUEVO: Colores de tema oscuro de mayor contraste
+• NUEVO: Asistente de Google para navegación y búsqueda
+• Datos del mapa OSM al 11 de enero
+• La configuración del tema de navegación "Auto" sigue el modo oscuro/claro del sistema
+• Líneas de metro más finas
+• Los resultados de búsqueda muestran la capacidad para estacionamiento de motocicletas, alquiler de bicicletas, carga de bicicletas y carga de automóviles
+• Mostrar nivel de piso en los resultados de búsqueda
+…más en omaps.org/es/news

@@ -1,0 +1,9 @@
+• BARU: Warna tema gelap kontras lebih tinggi
+• Google Assistant untuk navigasi dan pencarian
+• Data peta OSM per 11 Januari
+• Pengaturan tema navigasi "Otomatis" mengikuti mode gelap/terang sistem
+• Garis kereta bawah tanah lebih tipis
+• Hasil pencarian menunjukkan kapasitas parkir sepeda motor, penyewaan sepeda, pengisian daya sepeda, dan pengisian daya mobil
+• Tampilkan tingkat lantai dalam hasil pencarian
+• Terjemahan bahasa Albania dan panduan suara TTS
+…selengkapnya di omaps.org/id/news

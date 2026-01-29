@@ -1,0 +1,16 @@
+• NOWOŚĆ: Kolory ciemnego motywu o wyższym kontraście
+• Zaktualizowane dane OpenStreetMap (11 stycznia)
+• Wyłączono kasyna z kategorii „Rozrywka”
+• Zmniejszono grubość linii metra
+• Dodano informacje o pojemności do wyników wyszukiwania parkingów motocyklowych, wypożyczalni rowerów, ładowania rowerów i ładowania samochodów
+• Pokazywanie piętra w wynikach wyszukiwania
+• Szersze przyciski planowania trasy
+
+### Tłumaczenia
+
+• Dodano albańskie tłumaczenia aplikacji i wskazówki głosowe
+• Zaktualizowano FAQ i dodano tłumaczenia FAQ na arabski, czeski, holenderski, perski, grecki, hebrajski, hindi, węgierski, indonezyjski, włoski, litewski, marathi, szwedzki, telugu
+• Ulepszono niemieckie tłumaczenia aplikacji i FAQ
+• Dodano bułgarskie synonimy wyszukiwania
+• Zmieniono nazwę ustawienia „Przyciski powiększania” dla jasności
+• Poprawki tłumaczeń od współtwórców Weblate dla różnych języków

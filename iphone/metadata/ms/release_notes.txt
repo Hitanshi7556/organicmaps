@@ -1,0 +1,16 @@
+• BARU: Warna tema gelap kontras lebih tinggi
+• Data OpenStreetMap dikemas kini (11 Januari)
+• Kasino dikecualikan daripada kategori "Hiburan"
+• Mengurangkan ketebalan laluan kereta api bawah tanah
+• Menambah maklumat kapasiti pada hasil carian untuk tempat letak motosikal, sewaan basikal, pengecasan basikal dan pengecasan kereta
+• Tunjukkan tingkat dalam hasil carian
+• Butang perancangan laluan yang lebih lebar
+
+### Terjemahan
+
+• Menambah terjemahan aplikasi dan panduan suara bahasa Albania
+• Mengemas kini Soalan Lazim (FAQ) dan menambah terjemahan untuk bahasa Arab, Czech, Belanda, Farsi, Yunani, Ibrani, Hindi, Hungary, Indonesia, Itali, Lithuania, Marathi, Sweden, Telugu
+• Menambah baik terjemahan aplikasi dan FAQ bahasa Jerman
+• Menambah sinonim carian bahasa Bulgaria
+• Menamakan semula tetapan "Butang zum" untuk lebih jelas
+• Pembetulan terjemahan daripada penyumbang Weblate untuk pelbagai bahasa

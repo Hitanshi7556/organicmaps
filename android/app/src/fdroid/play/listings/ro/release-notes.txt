@@ -1,0 +1,8 @@
+• NOU: Culori cu contrast mai mare pentru tema întunecată
+• NOU: Google Assistant pentru navigare și căutare
+• Datele hărții OSM la 11 ianuarie
+• Setarea temei de navigare „Auto” urmează modul întunecat/luminos al sistemului
+• Linii de metrou mai subțiri
+• Rezultatele căutării arată capacitatea pentru parcarea motocicletelor, închirierea de biciclete, încărcarea bicicletelor și încărcarea mașinilor
+• Afișați nivelul etajului în rezultatele căutării
+…mai mult la omaps.org/news
