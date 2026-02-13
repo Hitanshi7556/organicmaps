@@ -1,6 +1,7 @@
 package app.organicmaps.sdk.routing;
 
 import androidx.annotation.NonNull;
+import app.organicmaps.sdk.Router;
 import app.organicmaps.sdk.settings.RoadType;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,17 +10,17 @@ public final class RoutingOptions
 {
   public static void addOption(@NonNull RoadType roadType)
   {
-    nativeAddOption(roadType.ordinal());
+    nativeAddOption(Router.get().ordinal(), roadType.ordinal());
   }
 
   public static void removeOption(@NonNull RoadType roadType)
   {
-    nativeRemoveOption(roadType.ordinal());
+    nativeRemoveOption(Router.get().ordinal(), roadType.ordinal());
   }
 
   public static boolean hasOption(@NonNull RoadType roadType)
   {
-    return nativeHasOption(roadType.ordinal());
+    return nativeHasOption(Router.get().ordinal(), roadType.ordinal());
   }
 
   public static boolean hasAnyOptions()
@@ -48,9 +49,9 @@ public final class RoutingOptions
   {
     throw new IllegalAccessException("RoutingOptions is a utility class and should not be instantiated");
   }
-  private static native void nativeAddOption(int option);
+  private static native void nativeAddOption(int routerType, int option);
 
-  private static native void nativeRemoveOption(int option);
+  private static native void nativeRemoveOption(int routerType, int option);
 
-  private static native boolean nativeHasOption(int option);
+  private static native boolean nativeHasOption(int routerType, int option);
 }
