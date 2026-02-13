@@ -1,5 +1,7 @@
 #pragma once
 
+#include "routing/vehicle_mask.hpp"
+
 #include "base/small_map.hpp"
 
 #include <optional>
@@ -33,6 +35,8 @@ public:
   static void SavePedestrianOptionsToSettings(RoutingOptions options);
   static RoutingOptions LoadBicycleOptionsFromSettings();
   static void SaveBicycleOptionsToSettings(RoutingOptions options);
+  static RoutingOptions LoadOptionsFromSettings(VehicleType vehicleType);
+  static void SaveOptionsToSettings(VehicleType vehicleType, RoutingOptions options);
 
   void Add(Road type);
   void Remove(Road type);
