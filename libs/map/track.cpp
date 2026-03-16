@@ -146,6 +146,21 @@ void Track::UpdateSelectionInfo(m2::RectD const & touchRect, TrackSelectionInfo 
   }
 }
 
+bool Track::HasTitle() const
+{
+  return !GetName().empty();
+}
+
+std::string Track::GetTitle() const
+{
+  return GetName();
+}
+
+int Track::GetMinTitleZoom() const
+{
+  return 13;
+}
+
 df::DepthLayer Track::GetDepthLayer() const
 {
   return df::DepthLayer::UserLineLayer;

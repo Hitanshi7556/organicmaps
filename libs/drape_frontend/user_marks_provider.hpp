@@ -14,6 +14,7 @@
 
 #include "platform/placement_settings.hpp"
 
+#include <string>
 #include <vector>
 
 namespace df
@@ -108,6 +109,9 @@ public:
   virtual kml::MarkGroupId GetGroupId() const = 0;
 
   virtual int GetMinZoom() const = 0;
+  virtual bool HasTitle() const = 0;
+  virtual std::string GetTitle() const = 0;
+  virtual int GetMinTitleZoom() const = 0;
   virtual DepthLayer GetDepthLayer() const = 0;
   virtual size_t GetLayerCount() const = 0;
   virtual dp::Color GetColor(size_t layerIndex) const = 0;

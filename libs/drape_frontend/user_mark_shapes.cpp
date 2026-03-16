@@ -3,6 +3,7 @@
 #include "drape_frontend/colored_symbol_shape.hpp"
 #include "drape_frontend/line_shape.hpp"
 #include "drape_frontend/map_shape.hpp"
+#include "drape_frontend/path_text_shape.hpp"
 #include "drape_frontend/poi_symbol_shape.hpp"
 #include "drape_frontend/shape_view_params.hpp"
 #include "drape_frontend/text_layout.hpp"
@@ -506,6 +507,30 @@ void ProcessSplineSegmentRects(m2::SharedSpline const & spline, double maxSegmen
   }
 }
 
+void GenerateLineText(ref_ptr<dp::GraphicsContext> context, ref_ptr<dp::TextureManager> textures,
+                      UserLineRenderParams const & renderInfo, TileKey const & tileKey,
+                      m2::SharedSpline const & clippedSpline, uint32_t textIndex, dp::Batcher & batcher)
+{
+  if (!renderInfo.m_hasTitle || renderInfo.m_title.empty())
+    return;
+
+  PathTextViewParams params;
+  params.m_markId = renderInfo.m_markId;
+  params.m_depthLayer = DepthLayer::OverlayLayer;
+  params.m_depthTestEnabled = false;
+  params.m_depth = 0.0f;
+  params.m_minVisibleScale = renderInfo.m_minTitleZoom;
+  params.m_mainText = renderInfo.m_title;
+  auto const vs = static_cast<float>(df::VisualParams::Instance().GetVisualScale());
+  params.m_textFont = dp::FontDecl(dp::Color::White(), 12.0f * vs, dp::Color::Black());
+  params.m_baseGtoPScale = GetScreenScale(tileKey.m_zoomLevel);
+  params.m_tileCenter = tileKey.GetGlobalRect().Center();
+
+  PathTextShape shape(clippedSpline, params, tileKey, textIndex);
+  if (shape.CalculateLayout(textures))
+    shape.Draw(context, make_ref(&batcher), textures);
+}
+
 void CacheUserLines(ref_ptr<dp::GraphicsContext> context, TileKey const & tileKey, ref_ptr<dp::TextureManager> textures,
                     kml::TrackIdCollection const & linesId, UserLinesRenderCollection const & renderParams,
                     dp::Batcher & batcher)
@@ -560,6 +585,7 @@ void CacheUserLines(ref_ptr<dp::GraphicsContext> context, TileKey const & tileKe
       if (spline->GetSize() < 2)
         continue;
 
+      uint32_t textIndex = kStartUserMarkOverlayIndex + static_cast<uint32_t>(id);
       for (auto const & clippedSpline : m2::ClipSplineByRect(tileRect, spline))
       {
         for (auto const & layer : renderInfo.m_layers)
@@ -579,6 +605,9 @@ void CacheUserLines(ref_ptr<dp::GraphicsContext> context, TileKey const & tileKe
 
           LineShape(clippedSpline, params).Draw(context, make_ref(&batcher), textures);
         }
+
+        if (tileKey.m_zoomLevel >= renderInfo.m_minTitleZoom)
+          GenerateLineText(context, textures, renderInfo, tileKey, clippedSpline, textIndex++, batcher);
       }
     }
   }

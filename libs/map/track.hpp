@@ -57,6 +57,9 @@ public:
   void UpdateSelectionInfo(m2::RectD const & touchRect, TrackSelectionInfo & info) const;
 
   int GetMinZoom() const override { return 1; }
+  bool HasTitle() const override;
+  std::string GetTitle() const override;
+  int GetMinTitleZoom() const override;
   df::DepthLayer GetDepthLayer() const override;
   size_t GetLayerCount() const override;
   dp::Color GetColor(size_t layerIndex) const override;

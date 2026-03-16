@@ -897,6 +897,10 @@ drape_ptr<UserLineRenderParams> DrapeEngine::GenerateLineRenderInfo(UserLineMark
 {
   auto renderInfo = make_unique_dp<UserLineRenderParams>();
   renderInfo->m_minZoom = mark->GetMinZoom();
+  renderInfo->m_minTitleZoom = mark->GetMinTitleZoom();
+  renderInfo->m_markId = static_cast<kml::MarkId>(mark->GetId());
+  renderInfo->m_hasTitle = mark->HasTitle();
+  renderInfo->m_title = mark->GetTitle();
   renderInfo->m_depthLayer = mark->GetDepthLayer();
 
   mark->ForEachGeometry([&renderInfo](std::vector<m2::PointD> && points)
