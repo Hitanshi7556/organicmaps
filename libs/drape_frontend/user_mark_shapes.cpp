@@ -563,6 +563,7 @@ void CacheUserLines(ref_ptr<dp::GraphicsContext> context, TileKey const & tileKe
       if (spline->GetSize() < 2)
         continue;
 
+      bool titleRendered = false;
       for (auto const & clippedSpline : m2::ClipSplineByRect(tileRect, spline))
       {
         for (auto const & layer : renderInfo.m_layers)
@@ -582,29 +583,32 @@ void CacheUserLines(ref_ptr<dp::GraphicsContext> context, TileKey const & tileKe
 
           LineShape(clippedSpline, params).Draw(context, make_ref(&batcher), textures);
         }
-      }
 
-      if (renderInfo.m_hasTitle && tileKey.m_zoomLevel >= kMinTrackTitleZoom)
-      {
-        PathTextViewParams textParams;
-        textParams.m_tileCenter = tileRect.Center();
-        textParams.m_mainText = renderInfo.m_title;
-        textParams.m_auxText = {};
-        textParams.m_textFont.m_color = dp::Color::Black();
-        textParams.m_textFont.m_outlineColor = dp::Color::White();
-        textParams.m_textFont.m_size = 12.0f * static_cast<float>(df::VisualParams::Instance().GetVisualScale());
-        textParams.m_baseGtoPScale = 1.0 / GetScreenScale(tileKey.m_zoomLevel);
-        textParams.m_depthTestEnabled = true;
-        textParams.m_depth = renderInfo.m_layers.empty() ? 0.0f : renderInfo.m_layers[0].m_depth;
-        textParams.m_depthLayer = DepthLayer::OverlayLayer;
-        textParams.m_minVisibleScale = renderInfo.m_minTitleZoom;
-        textParams.m_markId = renderInfo.m_trackId;
+        if (!titleRendered && renderInfo.m_hasTitle && tileKey.m_zoomLevel >= kMinTrackTitleZoom)
+        {
+          PathTextViewParams textParams;
+          textParams.m_tileCenter = tileRect.Center();
+          textParams.m_mainText = renderInfo.m_title;
+          textParams.m_auxText = {};
+          textParams.m_textFont.m_color = dp::Color::Black();
+          textParams.m_textFont.m_outlineColor = dp::Color::White();
+          textParams.m_textFont.m_size = 12.0f * static_cast<float>(df::VisualParams::Instance().GetVisualScale());
+          textParams.m_baseGtoPScale = 1.0 / GetScreenScale(tileKey.m_zoomLevel);
+          textParams.m_depthTestEnabled = true;
+          textParams.m_depth = renderInfo.m_layers.empty() ? 0.0f : renderInfo.m_layers[0].m_depth;
+          textParams.m_depthLayer = DepthLayer::OverlayLayer;
+          textParams.m_minVisibleScale = renderInfo.m_minTitleZoom;
+          textParams.m_markId = renderInfo.m_trackId;
 
-        uint32_t const textIndex = kStartUserMarkOverlayIndex + static_cast<uint32_t>(renderInfo.m_trackId);
-        PathTextShape pathText(clippedSpline, textParams, tileKey, textIndex);
-        if (pathText.CalculateLayout(textures))
-          pathText.Draw(context, make_ref(&batcher), textures);
+          uint32_t const textIndex = kStartUserMarkOverlayIndex + static_cast<uint32_t>(renderInfo.m_trackId);
+          PathTextShape pathText(clippedSpline, textParams, tileKey, textIndex);
+          if (pathText.CalculateLayout(textures))
+          {
+            pathText.Draw(context, make_ref(&batcher), textures);
+            titleRendered = true;
+          }
+        }
       }
     }
   }
-}  // namespace df
+}
