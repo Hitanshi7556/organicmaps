@@ -187,11 +187,6 @@ void Track::ForEachGeometry(GeometryFnT && fn) const
   }
 }
 
-bool Track::HasTitle() const
-{
-  return !GetName().empty();
-}
-
 std::string Track::GetTitle() const
 {
   return GetName();

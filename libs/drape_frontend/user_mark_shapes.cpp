@@ -3,11 +3,11 @@
 #include "drape_frontend/colored_symbol_shape.hpp"
 #include "drape_frontend/line_shape.hpp"
 #include "drape_frontend/map_shape.hpp"
+#include "drape_frontend/path_text_shape.hpp"
 #include "drape_frontend/poi_symbol_shape.hpp"
 #include "drape_frontend/shape_view_params.hpp"
 #include "drape_frontend/text_layout.hpp"
 #include "drape_frontend/text_shape.hpp"
-#include "drape_frontend/path_text_shape.hpp"
 #include "drape_frontend/visual_params.hpp"
 
 #include "shaders/programs.hpp"
@@ -33,6 +33,8 @@ namespace
 std::array<double, 20> constexpr kLineWidthZoomFactor = {
     // 1   2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20
     0.3, 0.3, 0.3, 0.4, 0.5, 0.6, 0.7, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+
+int constexpr kMinTrackTitleZoom = 13;
 
 template <typename TCreateVector>
 void AlignFormingNormals(TCreateVector const & fn, dp::Anchor anchor, dp::Anchor first, dp::Anchor second,
@@ -561,49 +563,48 @@ void CacheUserLines(ref_ptr<dp::GraphicsContext> context, TileKey const & tileKe
       if (spline->GetSize() < 2)
         continue;
 
-        for (auto const & clippedSpline : m2::ClipSplineByRect(tileRect, spline))
-              {
-                for (auto const & layer : renderInfo.m_layers)
-                {
-                  LineViewParams params;
-                  params.m_tileCenter = tileRect.Center();
-                  params.m_baseGtoPScale = 1.0f;
-                  params.m_cap = dp::RoundCap;
-                  params.m_join = dp::RoundJoin;
-                  params.m_color = layer.m_color;
-                  params.m_depthTestEnabled = true;
-                  params.m_depth = layer.m_depth;
-                  params.m_depthLayer = renderInfo.m_depthLayer;
-                  params.m_width = static_cast<float>(layer.m_width * vs * kLineWidthZoomFactor[tileKey.m_zoomLevel - 1]);
-                  params.m_minVisibleScale = 1;
-                  params.m_rank = 0;
+      for (auto const & clippedSpline : m2::ClipSplineByRect(tileRect, spline))
+      {
+        for (auto const & layer : renderInfo.m_layers)
+        {
+          LineViewParams params;
+          params.m_tileCenter = tileRect.Center();
+          params.m_baseGtoPScale = 1.0f;
+          params.m_cap = dp::RoundCap;
+          params.m_join = dp::RoundJoin;
+          params.m_color = layer.m_color;
+          params.m_depthTestEnabled = true;
+          params.m_depth = layer.m_depth;
+          params.m_depthLayer = renderInfo.m_depthLayer;
+          params.m_width = static_cast<float>(layer.m_width * vs * kLineWidthZoomFactor[tileKey.m_zoomLevel - 1]);
+          params.m_minVisibleScale = 1;
+          params.m_rank = 0;
 
-                  LineShape(clippedSpline, params).Draw(context, make_ref(&batcher), textures);
-                }
-              }
+          LineShape(clippedSpline, params).Draw(context, make_ref(&batcher), textures);
+        }
+      }
 
-              if (renderInfo.m_hasTitle && tileKey.m_zoomLevel >= renderInfo.m_minTitleZoom)
-              {
-                PathTextViewParams textParams;
-                textParams.m_tileCenter = tileRect.Center();
-                textParams.m_mainText = renderInfo.m_title;
-                textParams.m_auxText = {};
-                textParams.m_textFont.m_color = dp::Color::Black();
-                textParams.m_textFont.m_outlineColor = dp::Color::White();
-                textParams.m_textFont.m_size = 12.0f * static_cast<float>(df::VisualParams::Instance().GetVisualScale());
-                textParams.m_baseGtoPScale = 1.0 / GetScreenScale(tileKey.m_zoomLevel);
-                textParams.m_depthTestEnabled = true;
-                textParams.m_depth = renderInfo.m_layers.empty() ? 0.0f : renderInfo.m_layers[0].m_depth;
-                textParams.m_depthLayer = DepthLayer::OverlayLayer;
-                textParams.m_minVisibleScale = renderInfo.m_minTitleZoom;
-                textParams.m_markId = renderInfo.m_markId;
+      if (renderInfo.m_hasTitle && tileKey.m_zoomLevel >= kMinTrackTitleZoom)
+      {
+        PathTextViewParams textParams;
+        textParams.m_tileCenter = tileRect.Center();
+        textParams.m_mainText = renderInfo.m_title;
+        textParams.m_auxText = {};
+        textParams.m_textFont.m_color = dp::Color::Black();
+        textParams.m_textFont.m_outlineColor = dp::Color::White();
+        textParams.m_textFont.m_size = 12.0f * static_cast<float>(df::VisualParams::Instance().GetVisualScale());
+        textParams.m_baseGtoPScale = 1.0 / GetScreenScale(tileKey.m_zoomLevel);
+        textParams.m_depthTestEnabled = true;
+        textParams.m_depth = renderInfo.m_layers.empty() ? 0.0f : renderInfo.m_layers[0].m_depth;
+        textParams.m_depthLayer = DepthLayer::OverlayLayer;
+        textParams.m_minVisibleScale = renderInfo.m_minTitleZoom;
+        textParams.m_markId = renderInfo.m_trackId;
 
-                uint32_t const textIndex = kStartUserMarkOverlayIndex + static_cast<uint32_t>(renderInfo.m_markId % 1000);
-                PathTextShape pathText(spline, textParams, tileKey, textIndex);
-                if (pathText.CalculateLayout(textures))
-                  pathText.Draw(context, make_ref(&batcher), textures);
-              }
-            }    // end spline loop
-          }      // end id loop
-        }        // end CacheUserLines
-        }  // namespace df
+        uint32_t const textIndex = kStartUserMarkOverlayIndex + static_cast<uint32_t>(renderInfo.m_trackId);
+        PathTextShape pathText(clippedSpline, textParams, tileKey, textIndex);
+        if (pathText.CalculateLayout(textures))
+          pathText.Draw(context, make_ref(&batcher), textures);
+      }
+    }
+  }
+}  // namespace df
