@@ -138,6 +138,11 @@ public class SettingsPrefsFragment extends BaseXmlSettingsFragment implements La
             LanguagesFragment.class, getString(R.string.change_map_locale), null);
         langFragment.setListener(this);
       }
+      else if (key.equals("pref_backup_screen"))
+      {
+        getSettingsActivity().stackFragment(BackupSettingsFragment.class,
+                                            "Backup & Restore", null);
+      }
     }
     return super.onPreferenceTreeClick(preference);
   }

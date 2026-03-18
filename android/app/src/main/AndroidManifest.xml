@@ -577,6 +577,18 @@
         android:enabled="true"
         android:stopWithTask="false"/>
 
+    <service
+        android:name=".cloud.BackupService"
+        android:exported="false"
+        android:enabled="true"
+        android:stopWithTask="false"/>
+
+    <service
+        android:name=".cloud.RestoreService"
+        android:exported="false"
+        android:enabled="true"
+        android:stopWithTask="false"/>
+
     <provider
       android:name="androidx.core.content.FileProvider"
       android:authorities="${FILE_PROVIDER_PLACEHOLDER}"

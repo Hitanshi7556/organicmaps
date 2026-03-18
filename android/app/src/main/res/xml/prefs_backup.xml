@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <androidx.preference.PreferenceCategory
+    android:title="Google Account"
+    android:order="1">
+    <Preference
+      android:key="pref_backup_account"
+      android:title="Account"
+      android:summary="Not signed in"
+      app:singleLineTitle="false"
+      android:persistent="false"
+      android:order="1" />
+    <Preference
+      android:key="pref_backup_sign_in"
+      android:title="Sign in with Google"
+      app:singleLineTitle="false"
+      android:persistent="false"
+      android:order="2" />
+  </androidx.preference.PreferenceCategory>
+
+  <androidx.preference.PreferenceCategory
+    android:title="Bookmarks"
+    android:order="2">
+    <Preference
+      android:key="pref_backup_now"
+      android:title="Backup Now"
+      android:summary="Upload bookmarks to Google Drive"
+      app:singleLineTitle="false"
+      android:persistent="false"
+      android:order="1" />
+    <Preference
+      android:key="pref_restore_now"
+      android:title="Restore from Drive"
+      android:summary="Download bookmarks from Google Drive"
+      app:singleLineTitle="false"
+      android:persistent="false"
+      android:order="2" />
+    <Preference
+      android:key="pref_backup_status"
+      android:title="Last Backup"
+      android:summary="Never"
+      app:singleLineTitle="false"
+      android:persistent="false"
+      android:selectable="false"
+      android:order="3" />
+  </androidx.preference.PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>
+

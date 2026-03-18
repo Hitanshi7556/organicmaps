@@ -106,6 +106,7 @@ android {
 
     google {
       dimension 'default'
+      applicationIdSuffix '.google'
       versionName = android.defaultConfig.versionName + '-Google'
       buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@organicmaps.app"'
       buildConfigField 'String', 'REVIEW_URL', '"market://details?id=app.organicmaps"'
@@ -238,6 +239,12 @@ android {
     noCompress = ['txt', 'bin', 'html', 'png', 'json', 'mwm', 'ttf', 'sdf', 'ui', 'config', 'csv', 'spv', 'obj']
   }
 
+  packaging {
+    resources {
+      excludes += ['META-INF/INDEX.LIST', 'META-INF/DEPENDENCIES']
+    }
+  }
+
   compileOptions {
     coreLibraryDesugaringEnabled = true
   }
@@ -258,6 +265,12 @@ dependencies {
   // This is the microG project's re-implementation which is permissible on
   // F-droid because it's Apache-2.0.
   fdroidImplementation 'org.microg.gms:play-services-location:0.3.6.244735'
+
+  // Google Drive Backup (google flavor only)
+  googleImplementation 'com.google.android.gms:play-services-auth:20.7.0'
+  googleImplementation 'com.google.api-client:google-api-client-android:1.33.0'
+  googleImplementation 'com.google.apis:google-api-services-drive:v3-rev20260305-2.0.0'
+  googleImplementation 'com.google.http-client:google-http-client-gson:1.43.3'
 
   // Google Firebase Services
   if (googleFirebaseServicesEnabled) {
@@ -280,6 +293,7 @@ dependencies {
   implementation(platform('org.jetbrains.kotlin:kotlin-bom:2.3.0'))
   implementation 'androidx.annotation:annotation:1.9.1'
   implementation 'androidx.appcompat:appcompat:1.7.1'
+  implementation 'androidx.activity:activity:1.9.2'
   implementation 'androidx.car.app:app:1.8.0-alpha02'
   implementation 'androidx.car.app:app-projected:1.8.0-alpha02'
   implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
@@ -329,9 +343,14 @@ def allowedPermissions = [
     // Regex to allow it for the following app packages:
     // app.organicmaps
     // app.organicmaps.(debug|beta)
+    // app.organicmaps.google
+    // app.organicmaps.google.(debug|beta)
+    // app.organicmaps.huawei
+    // app.organicmaps.huawei.(debug|beta)
     // app.organicmaps.web
     // app.organicmaps.web.(debug|beta)
-    ~/name='app\.organicmaps(\.web)?(\.debug|\.beta)?\.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'/
+    // app.organicmaps.fdroid (no suffix variants)
+    ~/name='app\.organicmaps(\.(google|huawei|web))?(\.debug|\.beta)?\.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'/
 ]
 registerCheckApkPermissionsTasks(project, allowedPermissions)
 
