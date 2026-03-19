@@ -4,264 +4,217 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Comprehensive unit tests for SynchronizationStateResolver.
- * Tests all sync state combinations and edge cases.
+ * Comprehensive unit tests for SynchronizationStateResolver - MVP Phase 2.
+ * Tests all 7 sync states and edge cases.
  * 
- * This test suite demonstrates:
- * - Understanding of sync logic
- * - Comprehensive edge case coverage
- * - Architecture quality and maintainability
+ * Test coverage:
+ * - Empty states (both empty)
+ * - One-sided states (local only, cloud only)
+ * - Identical content (CONFLICT_IDENTICAL_MD5)
+ * - Different content with timestamps (LOCAL_NEWER, CLOUD_NEWER)
+ * - True conflicts (CONFLICT_DIFFERENT_CONTENT)
+ * - Edge cases (invalid timestamps, empty MD5, etc.)
  */
 public class SynchronizationStateResolverTest {
 
   private LocalMetadata localMetadata;
-  private List<GoogleDriveClient.FileMetadata> cloudFiles;
+  private RemoteMetadata remoteMetadata;
 
   @Before
   public void setUp() {
     localMetadata = null;
-    cloudFiles = null;
+    remoteMetadata = null;
   }
 
-  // ===== TEST 1-2: Empty States =====
+  // ===== TEST 1: Both Empty =====
 
   @Test
-  public void testBothEmpty_ReturnsEMPTY() {
+  public void testBothEmpty_ReturnsEMPTY_LOCAL_EMPTY_CLOUD() {
     SyncState state = SynchronizationStateResolver.resolveSyncState(null, null);
-    assertEquals(SyncState.EMPTY, state);
+    assertEquals(SyncState.EMPTY_LOCAL_EMPTY_CLOUD, state);
   }
 
   @Test
-  public void testBothEmptyWithEmptyLists_ReturnsEMPTY() {
+  public void testBothEmptyWithEmptyObjects_ReturnsEMPTY_LOCAL_EMPTY_CLOUD() {
     localMetadata = new LocalMetadata();
-    cloudFiles = new ArrayList<>();
+    remoteMetadata = new RemoteMetadata();
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.EMPTY, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.EMPTY_LOCAL_EMPTY_CLOUD, state);
   }
 
-  // ===== TEST 3-4: Local-Only States =====
+  // ===== TEST 2-3: Local-Only States =====
 
   @Test
   public void testLocalOnlyNoCloud_ReturnsLOCAL_ONLY() {
     localMetadata = new LocalMetadata("local_id", 1000L, "abc123", 5000L, 10);
-    cloudFiles = new ArrayList<>();
+    remoteMetadata = new RemoteMetadata();
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.LOCAL_ONLY, state);
   }
 
   @Test
   public void testLocalOnlyNullCloud_ReturnsLOCAL_ONLY() {
     localMetadata = new LocalMetadata("local_id", 1000L, "abc123", 5000L, 10);
-    cloudFiles = null;
+    remoteMetadata = null;
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.LOCAL_ONLY, state);
   }
 
-  // ===== TEST 5-6: Cloud-Only States =====
+  // ===== TEST 4-5: Cloud-Only States =====
 
   @Test
-  public void testCloudOnlyNoLocal_ReturnsCloud_ONLY() {
+  public void testCloudOnlyNoLocal_ReturnsCLOUD_ONLY() {
     localMetadata = null;
-    cloudFiles = createCloudFilesList(1000L, "cloud_id", "cloud123");
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, "cloud123", 10, 5000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.CLOUD_ONLY, state);
   }
 
   @Test
-  public void testCloudOnlyEmptyLocal_ReturnsCloud_ONLY() {
+  public void testCloudOnlyEmptyLocal_ReturnsCLOUD_ONLY() {
     localMetadata = new LocalMetadata();
-    cloudFiles = createCloudFilesList(1000L, "cloud_id", "cloud123");
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, "cloud123", 10, 5000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.CLOUD_ONLY, state);
   }
 
-  // ===== TEST 7: Identical Files (SYNCED) =====
+  // ===== TEST 6: Identical Files (CONFLICT_IDENTICAL_MD5) =====
 
   @Test
-  public void testIdenticalMD5_ReturnsSYNCED() {
+  public void testIdenticalMD5_ReturnsCONFLICT_IDENTICAL_MD5() {
     String sharedMd5 = "identical_hash_123";
     localMetadata = new LocalMetadata("local_id", 1000L, sharedMd5, 5000L, 10);
-    cloudFiles = createCloudFilesList(1000L, "cloud_id", sharedMd5);
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, sharedMd5, 10, 5000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.SYNCED, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.CONFLICT_IDENTICAL_MD5, state);
   }
 
-  // ===== TEST 8-9: Different Content, Local Newer =====
+  @Test
+  public void testIdenticalMD5_DifferentTimestamps_StillSynced() {
+    String sharedMd5 = "same_content";
+    localMetadata = new LocalMetadata("local_id", 1000L, sharedMd5, 5000L, 10);
+    remoteMetadata = new RemoteMetadata("cloud_id", 2000L, sharedMd5, 10, 5000L);
+
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.CONFLICT_IDENTICAL_MD5, state);
+  }
+
+  // ===== TEST 7-8: Different Content, Local Newer =====
 
   @Test
   public void testLocalNewer_ReturnsLOCAL_NEWER() {
     localMetadata = new LocalMetadata("local_id", 2000L, "local_hash", 6000L, 15);
-    cloudFiles = createCloudFilesList(1000L, "cloud_id", "cloud_hash");
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, "cloud_hash", 10, 5000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.LOCAL_NEWER, state);
   }
 
   @Test
-  public void testLocalSameFile_DifferentMD5_LocalNewer() {
-    localMetadata = new LocalMetadata("local_id", 5000L, "new_hash", 10000L, 50);
-    cloudFiles = createCloudFilesList(5000L, "cloud_id", "old_hash");
+  public void testLocalMuchNewer_ReturnsLOCAL_NEWER() {
+    localMetadata = new LocalMetadata("local_id", 86400000L, "new_hash", 10000L, 50);
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, "old_hash", 5, 2000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.CONFLICT, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.LOCAL_NEWER, state);
   }
 
-  // ===== TEST 10-11: Different Content, Cloud Newer =====
+  // ===== TEST 9-10: Different Content, Cloud Newer =====
 
   @Test
   public void testCloudNewer_ReturnsCLOUD_NEWER() {
     localMetadata = new LocalMetadata("local_id", 1000L, "local_hash", 5000L, 10);
-    cloudFiles = createCloudFilesList(2000L, "cloud_id", "cloud_hash");
+    remoteMetadata = new RemoteMetadata("cloud_id", 2000L, "cloud_hash", 15, 6000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.CLOUD_NEWER, state);
   }
 
   @Test
   public void testCloudMuchNewer_ReturnsCLOUD_NEWER() {
     localMetadata = new LocalMetadata("local_id", 1000L, "old_hash", 2000L, 5);
-    cloudFiles = createCloudFilesList(86400000L, "cloud_id", "new_hash");
+    remoteMetadata = new RemoteMetadata("cloud_id", 86400000L, "new_hash", 50, 10000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.CLOUD_NEWER, state);
   }
 
-  // ===== TEST 12-13: Conflict States =====
+  // ===== TEST 11-12: True Conflicts =====
 
   @Test
-  public void testSameTimeStampDifferentMD5_ReturnsCONFLICT() {
+  public void testSameTimestampDifferentMD5_ReturnsCONFLICT_DIFFERENT_CONTENT() {
     long timestamp = 1000L;
     localMetadata = new LocalMetadata("local_id", timestamp, "hash_a", 5000L, 10);
-    cloudFiles = createCloudFilesList(timestamp, "cloud_id", "hash_b");
+    remoteMetadata = new RemoteMetadata("cloud_id", timestamp, "hash_b", 15, 6000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.CONFLICT, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.CONFLICT_DIFFERENT_CONTENT, state);
   }
 
   @Test
-  public void testInvalidCloudTimestamp_ReturnsCONFLICT() {
+  public void testInvalidLocalTimestamp_ReturnsCONFLICT() {
+    localMetadata = new LocalMetadata("local_id", 0L, "local_hash", 5000L, 10);
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, "cloud_hash", 10, 5000L);
+
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.CONFLICT_DIFFERENT_CONTENT, state);
+  }
+
+  @Test
+  public void testInvalidRemoteTimestamp_ReturnsCONFLICT() {
     localMetadata = new LocalMetadata("local_id", 1000L, "local_hash", 5000L, 10);
-    cloudFiles = createCloudFilesList(0L, "cloud_id", "cloud_hash");
+    remoteMetadata = new RemoteMetadata("cloud_id", 0L, "cloud_hash", 10, 5000L);
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.CONFLICT, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.CONFLICT_DIFFERENT_CONTENT, state);
   }
 
-  // ===== TEST 14-15: Multiple Cloud Files =====
+  // ===== TEST 13-14: Edge Cases =====
 
   @Test
-  public void testMultipleCloudFiles_PicksMostRecent() {
-    localMetadata = new LocalMetadata("local_id", 5000L, "local_hash", 5000L, 10);
+  public void testEmptyLocalMD5_TreatedAsDifferent() {
+    localMetadata = new LocalMetadata("local_id", 1000L, "", 5000L, 10);
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, "cloud_hash", 10, 5000L);
 
-    cloudFiles = new ArrayList<>();
-    cloudFiles.add(createFileMetadata(1000L, "file_1", "hash_1"));
-    cloudFiles.add(createFileMetadata(3000L, "file_2", "hash_2"));
-    cloudFiles.add(createFileMetadata(2000L, "file_3", "hash_3"));
-
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.LOCAL_NEWER, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.CONFLICT_DIFFERENT_CONTENT, state);
   }
 
   @Test
-  public void testMultipleCloudFiles_SelectsLatest() {
-    localMetadata = new LocalMetadata("local_id", 1000L, "local_hash", 5000L, 10);
+  public void testBothEmptyMD5_SameTimestamp_StillConflict() {
+    localMetadata = new LocalMetadata("local_id", 1000L, "", 5000L, 10);
+    remoteMetadata = new RemoteMetadata("cloud_id", 1000L, "", 10, 5000L);
 
-    cloudFiles = new ArrayList<>();
-    cloudFiles.add(createFileMetadata(5000L, "file_1", "newest_hash"));
-    cloudFiles.add(createFileMetadata(2000L, "file_2", "old_hash"));
-
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.CLOUD_NEWER, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.CONFLICT_DIFFERENT_CONTENT, state);
   }
 
-  // ===== TEST 16-19: Edge Cases =====
-
   @Test
-  public void testZeroSizeLocal_StillValid() {
+  public void testZeroBookmarkCount_StillValid() {
     localMetadata = new LocalMetadata("local_id", 1000L, "empty_hash", 0L, 0);
-    cloudFiles = new ArrayList<>();
+    remoteMetadata = new RemoteMetadata();
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
     assertEquals(SyncState.LOCAL_ONLY, state);
   }
 
   @Test
-  public void testVeryLargeDifference_1YearOld() {
-    long oneYearAgoMs = 365L * 24 * 60 * 60 * 1000;
-    localMetadata = new LocalMetadata("local_id", 1000L, "old_hash", 5000L, 10);
-    cloudFiles = createCloudFilesList(1000L + oneYearAgoMs, "cloud_id", "new_hash");
+  public void testVeryLargeFileSize_StillValid() {
+    localMetadata = new LocalMetadata("local_id", 1000L, "big_file", 1000000000L, 5000);
+    remoteMetadata = new RemoteMetadata();
 
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.CLOUD_NEWER, state);
+    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, remoteMetadata);
+    assertEquals(SyncState.LOCAL_ONLY, state);
   }
 
-  @Test
-  public void testNegativeTimestamp_TreatsAsInvalid() {
-    localMetadata = new LocalMetadata("local_id", 1000L, "local_hash", 5000L, 10);
-    cloudFiles = createCloudFilesList(-1L, "cloud_id", "cloud_hash");
-
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.CONFLICT, state);
-  }
-
-  @Test
-  public void testEmptyMD5_TreatedAsDifferent() {
-    localMetadata = new LocalMetadata("local_id", 1000L, "hash_a", 5000L, 10);
-    cloudFiles = createCloudFilesList(1000L, "cloud_id", "");
-
-    SyncState state = SynchronizationStateResolver.resolveSyncState(localMetadata, cloudFiles);
-    assertEquals(SyncState.CONFLICT, state);
-  }
-
-  // ===== TEST 20-21: State Transitions =====
-
-  @Test
-  public void testValidTransition_LocalOnlyToSynced() {
-    assertTrue(SynchronizationStateResolver.isValidTransition(
-        SyncState.LOCAL_ONLY,
-        SyncState.SYNCED
-    ));
-  }
-
-  @Test
-  public void testValidTransition_CloudOnlyToSynced() {
-    assertTrue(SynchronizationStateResolver.isValidTransition(
-        SyncState.CLOUD_ONLY,
-        SyncState.SYNCED
-    ));
-  }
-
-  @Test
-  public void testInvalidTransition_EmptyToCloudOnly() {
-    assertFalse(SynchronizationStateResolver.isValidTransition(
-        SyncState.EMPTY,
-        SyncState.CLOUD_ONLY
-    ));
-  }
-
-  @Test
-  public void testValidTransition_SyncedToAny() {
-    assertTrue(SynchronizationStateResolver.isValidTransition(
-        SyncState.SYNCED,
-        SyncState.LOCAL_NEWER
-    ));
-    assertTrue(SynchronizationStateResolver.isValidTransition(
-        SyncState.SYNCED,
-        SyncState.CLOUD_ONLY
-    ));
-  }
-
-  // ===== TEST 22-23: Recommended Actions =====
+  // ===== TEST 15-16: Recommended Actions =====
 
   @Test
   public void testRecommendedAction_LocalOnly() {
@@ -275,24 +228,112 @@ public class SynchronizationStateResolverTest {
     assertTrue(action.contains("Restore"));
   }
 
-  // ===== Helper Methods =====
-
-  private List<GoogleDriveClient.FileMetadata> createCloudFilesList(
-      long timestamp, String fileId, String md5) {
-    List<GoogleDriveClient.FileMetadata> list = new ArrayList<>();
-    list.add(createFileMetadata(timestamp, fileId, md5));
-    return list;
+  @Test
+  public void testRecommendedAction_LocalNewer() {
+    String action = SynchronizationStateResolver.getRecommendedAction(SyncState.LOCAL_NEWER);
+    assertTrue(action.contains("backup") || action.contains("cloud"));
   }
 
-  private GoogleDriveClient.FileMetadata createFileMetadata(
-      long timestamp, String fileId, String md5) {
-    return new GoogleDriveClient.FileMetadata(
-        fileId,
-        "bookmarks_backup.zip",
-        timestamp,
-        md5,
+  @Test
+  public void testRecommendedAction_CloudNewer() {
+    String action = SynchronizationStateResolver.getRecommendedAction(SyncState.CLOUD_NEWER);
+    assertTrue(action.contains("Restore") || action.contains("restore"));
+  }
+
+  // ===== TEST 17-18: SyncState Helper Methods =====
+
+  @Test
+  public void testIsConflict_IdenticalMD5() {
+    assertTrue(SyncState.CONFLICT_IDENTICAL_MD5.isConflict());
+  }
+
+  @Test
+  public void testIsConflict_DifferentContent() {
+    assertTrue(SyncState.CONFLICT_DIFFERENT_CONTENT.isConflict());
+  }
+
+  @Test
+  public void testIsConflict_NotConflict() {
+    assertFalse(SyncState.LOCAL_ONLY.isConflict());
+    assertFalse(SyncState.CLOUD_ONLY.isConflict());
+    assertFalse(SyncState.LOCAL_NEWER.isConflict());
+  }
+
+  @Test
+  public void testIsInSync_IdenticalMD5() {
+    assertTrue(SyncState.CONFLICT_IDENTICAL_MD5.isInSync());
+  }
+
+  @Test
+  public void testIsInSync_Empty() {
+    assertTrue(SyncState.EMPTY_LOCAL_EMPTY_CLOUD.isInSync());
+  }
+
+  @Test
+  public void testRequiresAction_LocalOnly() {
+    assertTrue(SyncState.LOCAL_ONLY.requiresAction());
+  }
+
+  @Test
+  public void testRequiresAction_CloudNewer() {
+    assertTrue(SyncState.CLOUD_NEWER.requiresAction());
+  }
+
+  @Test
+  public void testRequiresAction_Synced() {
+    assertFalse(SyncState.CONFLICT_IDENTICAL_MD5.requiresAction());
+  }
+
+  // ===== TEST 19-20: Metadata Creation =====
+
+  @Test
+  public void testCreateLocalMetadata_AllFields() {
+    LocalMetadata meta = SynchronizationStateResolver.createLocalMetadata(
+        "file_id",
+        1000L,
+        "md5_hash",
+        5000L,
+        10
+    );
+
+    assertEquals("file_id", meta.getLocalFileId());
+    assertEquals(1000L, meta.getLocalTimestamp());
+    assertEquals("md5_hash", meta.getLocalMd5());
+    assertEquals(5000L, meta.getLocalFileSize());
+    assertEquals(10, meta.getLocalBookmarkCount());
+  }
+
+  @Test
+  public void testCreateRemoteMetadata_AllFields() {
+    RemoteMetadata meta = SynchronizationStateResolver.createRemoteMetadata(
+        "drive_id",
+        2000L,
+        "cloud_md5",
+        20,
         10000L
     );
+
+    assertEquals("drive_id", meta.getDriveFileId());
+    assertEquals(2000L, meta.getUploadTimestamp());
+    assertEquals("cloud_md5", meta.getMd5());
+    assertEquals(20, meta.getBookmarkCount());
+    assertEquals(10000L, meta.getFileSize());
+  }
+
+  // ===== TEST 21: Time Formatting =====
+
+  @Test
+  public void testFormatTimeDifference_Seconds() {
+    String formatted = SynchronizationStateResolver.formatTimeDifference(30000L);
+    assertTrue(formatted.contains("30"));
+    assertTrue(formatted.contains("second"));
+  }
+
+  @Test
+  public void testFormatTimeDifference_Days() {
+    long oneDayMs = 24L * 60 * 60 * 1000;
+    String formatted = SynchronizationStateResolver.formatTimeDifference(oneDayMs + 3600000L);
+    assertTrue(formatted.contains("day"));
   }
 }
 

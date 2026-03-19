@@ -3,6 +3,8 @@ package app.organicmaps.cloud;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,6 +14,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -112,10 +116,81 @@ public class RestoreService extends IntentService {
         return;
       }
 
-      // Step 3: Parse and import bookmarks
-      // TODO (GSoC): Actually call BookmarkManager.importBookmarks(jsonFile)
-      // For MVP, just count the bookmarks metadata
-      int bookmarkCount = 0;
+      // Step 3: Import bookmarks on main thread (BookmarkManager requires it)
+      Log.d(TAG, "Importing bookmarks on main thread...");
+      final AtomicBoolean importSuccess = new AtomicBoolean(false);
+      final CountDownLatch latch = new CountDownLatch(1);
+
+      Handler mainHandler = new Handler(Looper.getMainLooper());
+      mainHandler.post(() -> {
+        try {
+          // Add a listener to wait for async bookmark loading to complete
+          app.organicmaps.sdk.bookmarks.data.BookmarkManager.BookmarksLoadingListener listener = 
+              new app.organicmaps.sdk.bookmarks.data.BookmarkManager.BookmarksLoadingListener() {
+            @Override
+            public void onBookmarksLoadingFinished() {
+              try {
+                Log.d(TAG, "BookmarkManager finished loading bookmarks");
+                importSuccess.set(true);
+              } catch (Exception e) {
+                Log.e(TAG, "Error in loading listener", e);
+                importSuccess.set(false);
+              } finally {
+                // Remove listener
+                app.organicmaps.sdk.bookmarks.data.BookmarkManager.INSTANCE
+                    .removeLoadingListener(this);
+                latch.countDown();
+              }
+            }
+
+            @Override
+            public void onBookmarksFileImportSuccessful() {
+              Log.d(TAG, "Bookmarks imported successfully");
+              importSuccess.set(true);
+            }
+
+            @Override
+            public void onBookmarksFileImportFailed() {
+              Log.e(TAG, "Bookmarks import failed");
+              importSuccess.set(false);
+              app.organicmaps.sdk.bookmarks.data.BookmarkManager.INSTANCE
+                  .removeLoadingListener(this);
+              latch.countDown();
+            }
+          };
+          
+          // Register listener BEFORE loading
+          app.organicmaps.sdk.bookmarks.data.BookmarkManager.INSTANCE
+              .addLoadingListener(listener);
+          
+          // Now load the bookmarks file (this is async, listener will be called when done)
+          Log.d(TAG, "Calling loadBookmarksFile...");
+          app.organicmaps.sdk.bookmarks.data.BookmarkManager.INSTANCE
+              .loadBookmarksFile(jsonFile.getAbsolutePath(), true);
+          
+        } catch (Exception e) {
+          Log.e(TAG, "Error importing bookmarks on main thread", e);
+          importSuccess.set(false);
+          latch.countDown();
+        }
+      });
+
+      // Wait for main thread to complete import
+      try {
+        latch.await();
+      } catch (InterruptedException e) {
+        Log.e(TAG, "Interrupted while waiting for bookmark import", e);
+        notifyFailure("Restore interrupted");
+        return;
+      }
+
+      if (!importSuccess.get()) {
+        notifyFailure("Failed to import bookmarks");
+        return;
+      }
+
+      // Estimate bookmark count
+      int bookmarkCount = estimateBookmarkCount();
       Log.d(TAG, "Imported " + bookmarkCount + " bookmarks");
 
       // Step 4: Save restore metadata
@@ -169,19 +244,43 @@ public class RestoreService extends IntentService {
     Log.d(TAG, "Restore metadata saved");
   }
 
-  private void notifySuccess(int bookmarkCount) {
-    if (sCallback != null) {
-      sCallback.onRestoreSuccess(bookmarkCount);
-      sCallback = null;
+  /**
+   * Estimate bookmark count by summing all categories.
+   */
+  private int estimateBookmarkCount() {
+    try {
+      java.util.List<app.organicmaps.sdk.bookmarks.data.BookmarkCategory> categories = 
+          app.organicmaps.sdk.bookmarks.data.BookmarkManager.INSTANCE.getCategories();
+      int count = 0;
+      for (app.organicmaps.sdk.bookmarks.data.BookmarkCategory cat : categories) {
+        count += cat.getBookmarksCount();
+      }
+      return count;
+    } catch (Exception e) {
+      Log.w(TAG, "Could not estimate bookmark count", e);
+      return 0;
     }
+  }
+
+  private void notifySuccess(int bookmarkCount) {
+    Handler mainHandler = new Handler(Looper.getMainLooper());
+    mainHandler.post(() -> {
+      if (sCallback != null) {
+        sCallback.onRestoreSuccess(bookmarkCount);
+        sCallback = null;
+      }
+    });
   }
 
   private void notifyFailure(@NonNull String errorMessage) {
     Log.e(TAG, "Restore error: " + errorMessage);
-    if (sCallback != null) {
-      sCallback.onRestoreFailure(errorMessage);
-      sCallback = null;
-    }
+    Handler mainHandler = new Handler(Looper.getMainLooper());
+    mainHandler.post(() -> {
+      if (sCallback != null) {
+        sCallback.onRestoreFailure(errorMessage);
+        sCallback = null;
+      }
+    });
   }
 }
 
