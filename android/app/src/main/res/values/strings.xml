@@ -892,4 +892,32 @@
     <string name="login_osm_credentials">Login with password</string>
     <!-- Login to OSM button text -->
     <string name="login_osm_browser">Login using Browser</string>
+
+    <!-- SECTION: Automatic Backups -->
+    <!-- Label for enabling automatic backups -->
+    <string name="pref_auto_backup_enabled">Enable Automatic Backups</string>
+    <!-- Summary for auto backup enabled preference -->
+    <string name="pref_auto_backup_enabled_summary">Automatically backup bookmarks on schedule</string>
+    <!-- Frequency labels for backup schedule -->
+    <string-array name="backup_frequency_labels">
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <!-- Frequency values for backup schedule -->
+    <string-array name="backup_frequency_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <!-- Time preference title -->
+    <string name="pref_backup_time">Backup Time</string>
+    <!-- Time preference summary -->
+    <string name="pref_backup_time_summary">Time of day to backup (2:00 AM default)</string>
+    <!-- Auto-backup status title -->
+    <string name="pref_auto_backup_status">Auto-Backup Status</string>
+    <!-- Auto-backup never run -->
+    <string name="auto_backup_never_run">Never backed up</string>
+    <!-- Auto-backup format string -->
+    <string name="auto_backup_last_run">Last backup: %s</string>
 </resources>

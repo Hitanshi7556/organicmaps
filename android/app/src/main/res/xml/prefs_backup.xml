@@ -48,5 +48,43 @@
       android:order="3" />
   </androidx.preference.PreferenceCategory>
 
+  <androidx.preference.PreferenceCategory
+    android:title="Automatic Backups"
+    android:order="3">
+    <androidx.preference.SwitchPreferenceCompat
+      android:key="pref_auto_backup_enabled"
+      android:title="Enable Automatic Backups"
+      android:summary="Automatically backup bookmarks on schedule"
+      android:defaultValue="false"
+      android:persistent="false"
+      android:order="1" />
+    <androidx.preference.ListPreference
+      android:key="pref_backup_frequency"
+      android:title="Backup Frequency"
+      android:summary="How often to backup bookmarks"
+      android:entries="@array/backup_frequency_labels"
+      android:entryValues="@array/backup_frequency_values"
+      android:defaultValue="0"
+      android:persistent="false"
+      android:dependency="pref_auto_backup_enabled"
+      android:order="2" />
+    <app.organicmaps.settings.TimePreference
+      android:key="pref_backup_time"
+      android:title="Backup Time"
+      android:summary="Time of day to backup (2:00 AM default)"
+      android:defaultValue="02:00"
+      android:persistent="false"
+      android:dependency="pref_auto_backup_enabled"
+      android:order="3" />
+    <Preference
+      android:key="pref_auto_backup_status"
+      android:title="Auto-Backup Status"
+      android:summary="Never backed up"
+      app:singleLineTitle="false"
+      android:persistent="false"
+      android:selectable="false"
+      android:order="4" />
+  </androidx.preference.PreferenceCategory>
+
 </androidx.preference.PreferenceScreen>
 

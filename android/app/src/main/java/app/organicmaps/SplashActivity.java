@@ -146,6 +146,16 @@ public class SplashActivity extends AppCompatActivity
         locationHelper.start();
     }
 
+    // Initialize auto-backup system (Google flavor only)
+    try {
+      Class<?> autoBackupInitializer = Class.forName("app.organicmaps.cloud.AutoBackupInitializer");
+      autoBackupInitializer.getMethod("initialize", android.content.Context.class).invoke(null, this);
+    } catch (ClassNotFoundException e) {
+      Logger.d(TAG, "AutoBackupInitializer not available (non-Google flavor)");
+    } catch (Exception e) {
+      Logger.w(TAG, "Error initializing auto-backup system", e);
+    }
+
     if (!asyncContinue)
       processNavigation();
   }
