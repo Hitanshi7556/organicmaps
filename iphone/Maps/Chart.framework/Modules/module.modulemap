@@ -1,4 +1,0 @@
-framework module Chart {
-  header "Chart-Swift.h"
-  requires objc
-}

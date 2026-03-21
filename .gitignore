@@ -195,3 +195,5 @@ iphone/metadata/**/keywords.txt
 
 # clangd cache
 .cache/clangd/
+iphone/Maps/CoreApi.framework/
+iphone/Maps/Chart.framework/
