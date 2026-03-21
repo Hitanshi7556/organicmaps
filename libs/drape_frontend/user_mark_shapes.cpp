@@ -612,3 +612,4 @@ void CacheUserLines(ref_ptr<dp::GraphicsContext> context, TileKey const & tileKe
     }
   }
 }
+}  // namespace df
